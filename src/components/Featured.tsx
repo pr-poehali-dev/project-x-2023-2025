@@ -14,7 +14,10 @@ export default function Featured() {
           От уютных коттеджей у моря до панорамных вилл в горах. Каждый дом проверен,
           а бронирование занимает меньше минуты — без звонков и долгих переписок.
         </p>
-        <button className="bg-black text-white border border-black px-4 py-2 text-sm transition-all duration-300 hover:bg-white hover:text-black cursor-pointer w-fit uppercase tracking-wide">
+        <button
+          onClick={() => document.getElementById("how")?.scrollIntoView({ behavior: "smooth" })}
+          className="bg-black text-white border border-black px-4 py-2 text-sm transition-all duration-300 hover:bg-white hover:text-black cursor-pointer w-fit uppercase tracking-wide"
+        >
           Смотреть дома
         </button>
       </div>
