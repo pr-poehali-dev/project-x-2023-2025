@@ -2,6 +2,9 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Icon from "@/components/ui/icon";
 
+const BOOKINGS_URL = "https://functions.poehali.dev/e1bbd3dc-4869-45cb-8f1d-d59b858318d6";
+const PREPAYMENT_PERCENT = 30;
+
 const houses = [
   {
     id: 1,
@@ -75,6 +78,8 @@ interface BookingModalProps {
 function BookingModal({ house, onClose }: BookingModalProps) {
   const [form, setForm] = useState({ name: "", phone: "", dateFrom: "", dateTo: "" });
   const [sent, setSent] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const nights =
     form.dateFrom && form.dateTo
@@ -88,10 +93,37 @@ function BookingModal({ house, onClose }: BookingModalProps) {
       : 0;
 
   const total = nights * house.price;
+  const prepayment = Math.round(total * PREPAYMENT_PERCENT / 100);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setSent(true);
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch(BOOKINGS_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          house_id: house.id,
+          house_title: house.title,
+          house_location: house.location,
+          house_price: house.price,
+          guest_name: form.name,
+          guest_phone: form.phone,
+          date_from: form.dateFrom,
+          date_to: form.dateTo,
+          nights,
+          total_amount: total,
+          prepayment,
+        }),
+      });
+      if (!res.ok) throw new Error("Ошибка сервера");
+      setSent(true);
+    } catch {
+      setError("Не удалось отправить заявку. Попробуйте ещё раз.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -109,11 +141,14 @@ function BookingModal({ house, onClose }: BookingModalProps) {
 
         {sent ? (
           <div className="px-6 py-12 text-center">
-            <div className="flex justify-center mb-4">
+            <div className="flex justify-center mb-4 text-green-600">
               <Icon name="CheckCircle" size={48} />
             </div>
-            <h3 className="text-xl font-bold mb-2">Заявка отправлена!</h3>
-            <p className="text-neutral-500 mb-6">Мы свяжемся с вами в ближайшее время для подтверждения бронирования.</p>
+            <h3 className="text-xl font-bold mb-2">Заявка принята!</h3>
+            <p className="text-neutral-500 mb-2">Мы свяжемся с вами для подтверждения.</p>
+            <p className="text-sm text-neutral-400 mb-6">
+              Предоплата {PREPAYMENT_PERCENT}% — <span className="font-semibold text-neutral-700">{prepayment.toLocaleString("ru-RU")} ₽</span>
+            </p>
             <button
               onClick={onClose}
               className="bg-black text-white px-8 py-2 text-sm uppercase tracking-wide hover:bg-neutral-700 transition-colors cursor-pointer"
@@ -184,17 +219,28 @@ function BookingModal({ house, onClose }: BookingModalProps) {
               </div>
 
               {nights > 0 && (
-                <div className="bg-neutral-50 border border-neutral-200 px-4 py-3 flex justify-between items-center">
-                  <span className="text-sm text-neutral-600">{nights} {nights === 1 ? "ночь" : nights < 5 ? "ночи" : "ночей"}</span>
-                  <span className="font-bold text-lg">{total.toLocaleString("ru-RU")} ₽</span>
+                <div className="bg-neutral-50 border border-neutral-200 px-4 py-3 flex flex-col gap-1">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-neutral-600">
+                      {nights} {nights === 1 ? "ночь" : nights < 5 ? "ночи" : "ночей"}
+                    </span>
+                    <span className="font-bold text-lg">{total.toLocaleString("ru-RU")} ₽</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-neutral-500">Предоплата {PREPAYMENT_PERCENT}%</span>
+                    <span className="text-sm font-semibold text-green-700">{prepayment.toLocaleString("ru-RU")} ₽</span>
+                  </div>
                 </div>
               )}
 
+              {error && <p className="text-red-500 text-sm">{error}</p>}
+
               <button
                 type="submit"
-                className="bg-black text-white py-3 text-sm uppercase tracking-wide hover:bg-neutral-700 transition-colors cursor-pointer w-full mt-2"
+                disabled={loading}
+                className="bg-black text-white py-3 text-sm uppercase tracking-wide hover:bg-neutral-700 transition-colors cursor-pointer w-full mt-2 disabled:opacity-50"
               >
-                Отправить заявку
+                {loading ? "Отправляем..." : "Отправить заявку"}
               </button>
             </form>
           </>
@@ -219,7 +265,7 @@ export default function Catalog() {
             <Icon name="ArrowLeft" size={18} />
             <span className="text-sm uppercase tracking-wide">Назад</span>
           </button>
-          <div className="text-black text-sm uppercase tracking-wide font-bold">staylux</div>
+          <div className="text-black text-sm uppercase tracking-wide font-bold">ValdayEcoLife</div>
           <div className="text-sm text-neutral-500">{houses.length} домов</div>
         </div>
       </header>

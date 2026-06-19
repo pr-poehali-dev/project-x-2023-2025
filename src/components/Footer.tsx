@@ -38,10 +38,10 @@ export default function Footer() {
                   +7 (495) 000-00-00
                 </a>
                 <a
-                  href="mailto:hello@staylux.ru"
+                  href="mailto:hello@valdayecolife.ru"
                   className="text-white hover:text-neutral-400 transition-colors duration-300 text-sm sm:text-base"
                 >
-                  hello@staylux.ru
+                  hello@valdayecolife.ru
                 </a>
                 <a
                   href="#"
@@ -52,10 +52,10 @@ export default function Footer() {
               </div>
             </div>
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 sm:gap-0">
-              <h1 className="text-[18vw] sm:text-[16vw] lg:text-[14vw] leading-[0.8] mt-4 sm:mt-6 lg:mt-10 text-white font-bold tracking-tight">
-                STAYLUX
+              <h1 className="text-[10vw] sm:text-[9vw] lg:text-[8vw] leading-[0.8] mt-4 sm:mt-6 lg:mt-10 text-white font-bold tracking-tight">
+                VALDAYECOLIFE
               </h1>
-              <p className="text-white text-sm sm:text-base">{new Date().getFullYear()} StayLux</p>
+              <p className="text-white text-sm sm:text-base">{new Date().getFullYear()} ValdayEcoLife</p>
             </div>
           </div>
         </div>

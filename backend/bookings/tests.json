@@ -1,0 +1,33 @@
+{
+  "tests": [
+    {
+      "name": "GET bookings list",
+      "method": "GET",
+      "path": "/",
+      "expectedStatus": 200,
+      "expectedBody": {"bookings": []},
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "POST create booking",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "house_id": 1,
+        "house_title": "Вилла у моря",
+        "house_location": "Сочи",
+        "house_price": 12000,
+        "guest_name": "Иван Иванов",
+        "guest_phone": "+79990000000",
+        "date_from": "2026-07-01",
+        "date_to": "2026-07-05",
+        "nights": 4,
+        "total_amount": 48000,
+        "prepayment": 14400
+      },
+      "expectedStatus": 201,
+      "expectedBody": {"status": "pending"},
+      "bodyMatcher": "partial"
+    }
+  ]
+}
