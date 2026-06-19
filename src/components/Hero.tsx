@@ -32,7 +32,10 @@ export default function Hero() {
         <p className="text-lg md:text-xl max-w-2xl mx-auto px-6 opacity-90 mb-8">
           Тысячи домов по всему миру — найди идеальное место и забронируй за пару кликов
         </p>
-        <button className="bg-white text-black px-8 py-3 text-sm uppercase tracking-wide transition-all duration-300 hover:bg-transparent hover:text-white border border-white cursor-pointer">
+        <button
+          onClick={() => document.getElementById("catalog")?.scrollIntoView({ behavior: "smooth" })}
+          className="bg-white text-black px-8 py-3 text-sm uppercase tracking-wide transition-all duration-300 hover:bg-transparent hover:text-white border border-white cursor-pointer"
+        >
           Найти дом
         </button>
       </div>
