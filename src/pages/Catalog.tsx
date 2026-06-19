@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Icon from "@/components/ui/icon";
 
@@ -64,8 +65,148 @@ const houses = [
   },
 ];
 
+type House = typeof houses[0];
+
+interface BookingModalProps {
+  house: House;
+  onClose: () => void;
+}
+
+function BookingModal({ house, onClose }: BookingModalProps) {
+  const [form, setForm] = useState({ name: "", phone: "", dateFrom: "", dateTo: "" });
+  const [sent, setSent] = useState(false);
+
+  const nights =
+    form.dateFrom && form.dateTo
+      ? Math.max(
+          0,
+          Math.round(
+            (new Date(form.dateTo).getTime() - new Date(form.dateFrom).getTime()) /
+              (1000 * 60 * 60 * 24)
+          )
+        )
+      : 0;
+
+  const total = nights * house.price;
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setSent(true);
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <div className="bg-white w-full max-w-md shadow-2xl">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-200">
+          <h2 className="text-lg font-bold uppercase tracking-wide">Бронирование</h2>
+          <button onClick={onClose} className="text-neutral-400 hover:text-black transition-colors cursor-pointer">
+            <Icon name="X" size={20} />
+          </button>
+        </div>
+
+        {sent ? (
+          <div className="px-6 py-12 text-center">
+            <div className="flex justify-center mb-4">
+              <Icon name="CheckCircle" size={48} />
+            </div>
+            <h3 className="text-xl font-bold mb-2">Заявка отправлена!</h3>
+            <p className="text-neutral-500 mb-6">Мы свяжемся с вами в ближайшее время для подтверждения бронирования.</p>
+            <button
+              onClick={onClose}
+              className="bg-black text-white px-8 py-2 text-sm uppercase tracking-wide hover:bg-neutral-700 transition-colors cursor-pointer"
+            >
+              Закрыть
+            </button>
+          </div>
+        ) : (
+          <>
+            <div className="px-6 py-4 bg-neutral-50 border-b border-neutral-200 flex gap-4 items-center">
+              <img src={house.image} alt={house.title} className="w-16 h-16 object-cover flex-shrink-0" />
+              <div>
+                <p className="font-bold text-neutral-900">{house.title}</p>
+                <p className="text-sm text-neutral-500 flex items-center gap-1">
+                  <Icon name="MapPin" size={12} />
+                  {house.location}
+                </p>
+                <p className="text-sm font-semibold mt-1">{house.price.toLocaleString("ru-RU")} ₽ / ночь</p>
+              </div>
+            </div>
+
+            <form onSubmit={handleSubmit} className="px-6 py-6 flex flex-col gap-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs uppercase tracking-wide text-neutral-500 mb-1 block">Заезд</label>
+                  <input
+                    type="date"
+                    required
+                    value={form.dateFrom}
+                    onChange={(e) => setForm({ ...form, dateFrom: e.target.value })}
+                    className="w-full border border-neutral-300 px-3 py-2 text-sm focus:outline-none focus:border-black transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs uppercase tracking-wide text-neutral-500 mb-1 block">Выезд</label>
+                  <input
+                    type="date"
+                    required
+                    value={form.dateTo}
+                    onChange={(e) => setForm({ ...form, dateTo: e.target.value })}
+                    className="w-full border border-neutral-300 px-3 py-2 text-sm focus:outline-none focus:border-black transition-colors"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs uppercase tracking-wide text-neutral-500 mb-1 block">Ваше имя</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Иван Иванов"
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  className="w-full border border-neutral-300 px-3 py-2 text-sm focus:outline-none focus:border-black transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs uppercase tracking-wide text-neutral-500 mb-1 block">Телефон</label>
+                <input
+                  type="tel"
+                  required
+                  placeholder="+7 (999) 000-00-00"
+                  value={form.phone}
+                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                  className="w-full border border-neutral-300 px-3 py-2 text-sm focus:outline-none focus:border-black transition-colors"
+                />
+              </div>
+
+              {nights > 0 && (
+                <div className="bg-neutral-50 border border-neutral-200 px-4 py-3 flex justify-between items-center">
+                  <span className="text-sm text-neutral-600">{nights} {nights === 1 ? "ночь" : nights < 5 ? "ночи" : "ночей"}</span>
+                  <span className="font-bold text-lg">{total.toLocaleString("ru-RU")} ₽</span>
+                </div>
+              )}
+
+              <button
+                type="submit"
+                className="bg-black text-white py-3 text-sm uppercase tracking-wide hover:bg-neutral-700 transition-colors cursor-pointer w-full mt-2"
+              >
+                Отправить заявку
+              </button>
+            </form>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function Catalog() {
   const navigate = useNavigate();
+  const [selectedHouse, setSelectedHouse] = useState<House | null>(null);
 
   return (
     <div className="min-h-screen bg-neutral-50">
@@ -128,7 +269,10 @@ export default function Catalog() {
                     </span>
                     <span className="text-neutral-400 text-sm"> / ночь</span>
                   </div>
-                  <button className="bg-black text-white px-5 py-2 text-sm uppercase tracking-wide transition-all duration-300 hover:bg-neutral-700 cursor-pointer">
+                  <button
+                    onClick={() => setSelectedHouse(house)}
+                    className="bg-black text-white px-5 py-2 text-sm uppercase tracking-wide transition-all duration-300 hover:bg-neutral-700 cursor-pointer"
+                  >
                     Забронировать
                   </button>
                 </div>
@@ -137,6 +281,10 @@ export default function Catalog() {
           ))}
         </div>
       </div>
+
+      {selectedHouse && (
+        <BookingModal house={selectedHouse} onClose={() => setSelectedHouse(null)} />
+      )}
     </div>
   );
 }
